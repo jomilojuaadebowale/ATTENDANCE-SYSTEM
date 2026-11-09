@@ -67,6 +67,15 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @model_validator(mode="after")
+    def _fix_database_url_scheme(self) -> "Settings":
+        """Ensures the database URL uses the asyncpg driver scheme for production/Render compatibility."""
+        if self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif self.database_url.startswith("postgresql://") and "+asyncpg" not in self.database_url:
+            self.database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return self
+
+    @model_validator(mode="after")
     def _refuse_dev_auth_in_production(self) -> "Settings":
         if self.environment == "production" and self.auth_provider == "dev":
             raise ValueError("AUTH_PROVIDER=dev is not allowed when ENVIRONMENT=production")
