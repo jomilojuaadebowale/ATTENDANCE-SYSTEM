@@ -1,0 +1,28 @@
+# secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+firebase-service-account*.json
+*serviceAccount*.json
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+.next/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+*.log
+*.dump
+*.sql.gz
