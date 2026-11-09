@@ -10,7 +10,7 @@ COPY migrations ./migrations
 COPY app ./app
 COPY scripts ./scripts
 
-# Run as an unprivileged user
+# Run as an unprivileged user and set up ownership
 RUN useradd --system --uid 10001 appuser && chown -R appuser /srv
 USER appuser
 
@@ -18,5 +18,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=3s --retries=5 \
   CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).status == 200 else 1)"
 
-# Runs migrations first, then starts uvicorn if migrations succeed (&&)
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Runs migrations -> seeds database -> starts uvicorn server
+CMD ["sh", "-c", "alembic upgrade head && python -m scripts.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
